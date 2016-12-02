@@ -21,7 +21,6 @@ Group:   Development/Tools
 License: MIT
 URL:     http://brackets.io
 Source0: http://rpm-ostree.cloud.fedoraproject.org/repo/pkgs/mosquito/brackets/brackets/adobe.brackets.extract.0.8.0-1749-release.zip/200eb47ad53f74e57caa13a6ae16ef5a/adobe.brackets.extract.0.8.0-1749-release.zip
-Source1: GettingStarted-zhcn.html
 
 BuildRequires: alsa-lib, GConf2
 BuildRequires: gtk2-devel, git
@@ -110,8 +109,8 @@ mkdir --parents %{buildroot}%{_libdir}/%{name}/auto-install-extensions
 install -m 0644 %{S:0} %{buildroot}%{_libdir}/%{name}/auto-install-extensions/
 
 # Getting Started zh_cn
-cp -a %{buildroot}%{_libdir}/%{name}/samples/zh-{tw,cn}
-install -m 0644 %{S:1} %{buildroot}%{_libdir}/%{name}/samples/zh-cn/Get*/index.html
+# cp -a %{buildroot}%{_libdir}/%{name}/samples/zh-{tw,cn}
+# install -m 0644 %{S:1} %{buildroot}%{_libdir}/%{name}/samples/zh-cn/Get*/index.html
 
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null ||:
