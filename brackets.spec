@@ -7,13 +7,13 @@
 %global repo %{project}
 
 # commit
-%global _commit0 b0a363b71822e16936f5cac4ddc93066e620853f
+%global _commit0 3af64fae4b8430318770375c0125fcc9eeda1e85
 %global _scommit0 %(c=%{_commit0}; echo ${c:0:7})
-%global _commit1 2656b613d270c5be012276968a150359e8c35eef
+%global _commit1 0ad2696e4e34880385c710addab1554d1476315c
 %global _scommit1 %(c=%{_commit1}; echo ${c:0:7})
 
 Name:    brackets
-Version: 1.7
+Version: 1.8
 Release: 1%{?dist}
 Summary: An open source code editor for the web
 
@@ -28,8 +28,12 @@ BuildRequires: gtk2-devel, git
 BuildRequires: /usr/bin/npm, node-gyp
 BuildRequires: desktop-file-utils
 Requires: desktop-file-utils
+%if 0%{?fedora}
+# enable Live Preview
+Recommends: google-chrome
 # enable LiveDevelopment Inspector
 Recommends: ruby
+%endif
 Obsoletes: %{name} <= 1.5.0
 
 # libcef.so require libgcrypt.so.11, libudev.so.0
@@ -53,7 +57,7 @@ Requires: libgcrypt
 git clone https://github.com/adobe/brackets
 git clone https://github.com/adobe/brackets-shell
 pushd %{name} && git checkout %{_commit0} && git submodule update --init && popd
-pushd %{name}-shell && git checkout linux-1547 && popd
+pushd %{name}-shell && git checkout %{_commit1} && popd
 
 %build
 ln -sfv %{_libdir}/libudev.so.1 %{_builddir}/libudev.so.0
@@ -137,6 +141,8 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/Brackets-node
 
 %changelog
+* Thu Dec  1 2016 mosquito <sensor.wen@gmail.com> - 1.8-1
+- Release 1.8
 * Fri Jun 17 2016 mosquito <sensor.wen@gmail.com> - 1.7-1
 - Release 1.7
 * Mon Jan 25 2016 mosquito <sensor.wen@gmail.com> - 1.6-1
