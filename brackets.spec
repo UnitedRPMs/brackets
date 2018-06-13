@@ -1,116 +1,139 @@
-# https://github.com/jgillich/brackets-rpm
+%{?nodejs_find_provides_and_requires}
+%global arch %(test $(rpm -E%?_arch) = x86_64 && echo "x64" || echo "ia32")
 %global debug_package %{nil}
 %global _hardened_build 1
-%global __provides_exclude (npm)
-%global __requires_exclude (npm|0.12)
-%global project brackets
-%global repo %{project}
+%global __provides_exclude_from /opt/%{name}/node-core
+%global __requires_exclude_from /opt/%{name}/node-core
+%global __provides_exclude_from /opt/%{name}/
+%global __requires_exclude_from /opt/%{name}/
+%global __requires_exclude (npm|libnode)
 
-# commit
-%global _commit0 3af64fae4b8430318770375c0125fcc9eeda1e85
-%global _scommit0 %(c=%{_commit0}; echo ${c:0:7})
-%global _commit1 0ad2696e4e34880385c710addab1554d1476315c
-%global _scommit1 %(c=%{_commit1}; echo ${c:0:7})
+# commit brackets
+%global _commit defded0cafa7a7e815ba30d5c8babaa483042dde
+%global _shortcommit %(c=%{_commit}; echo ${c:0:7})
+
+# commit brackets-shell
+%global _commit1 66072d0d75040f9c9b49631475bd747e87e556f7
+%global _shortcommit1 %(c=%{_commit1}; echo ${c:0:7})
+
+%bcond_with clang
+%bcond_with source_cef
 
 Name:    brackets
-Version: 1.8
+Version: 1.13
 Release: 1%{?dist}
 Summary: An open source code editor for the web
 
-Group:   Development/Tools
+Group:   Applications/Editors
 License: MIT
 URL:     http://brackets.io
-Source0: http://rpm-ostree.cloud.fedoraproject.org/repo/pkgs/mosquito/brackets/brackets/adobe.brackets.extract.0.8.0-1749-release.zip/200eb47ad53f74e57caa13a6ae16ef5a/adobe.brackets.extract.0.8.0-1749-release.zip
+Source0: https://github.com/adobe/brackets/archive/%{_commit}/%{name}-%{_shortcommit}.tar.gz
+Source1: https://github.com/adobe/brackets-shell/archive/%{_commit1}/%{name}-shell-%{_shortcommit1}.tar.gz
+# Why 306 mb with cef?
+%if %{with source_cef} 
+Source2: http://s3.amazonaws.com/files.brackets.io/cef/cef_binary_3.2785.1487_linux64_release.zip
+%endif
+Source3: brackets-snapshot
+Source4: brackets-shell-snapshot
 
-BuildRequires: alsa-lib, GConf2
-BuildRequires: gtk2-devel, git
-BuildRequires: /usr/bin/npm, node-gyp
+BuildRequires: alsa-lib
+BuildRequires: GConf2 
+BuildRequires: python2-devel 
+BuildRequires: libXScrnSaver 
+BuildRequires: nss-devel 
+BuildRequires: pango-devel 
+BuildRequires: unzip
+BuildRequires: gtk2-devel
+BuildRequires: icu
+BuildRequires: git 
+BuildRequires: curl
 BuildRequires: desktop-file-utils
+%if %{with clang} 
+BuildRequires: clang llvm
+%endif
+BuildRequires: compat-libgcrypt
 Requires: desktop-file-utils
-%if 0%{?fedora}
-# enable Live Preview
-Recommends: google-chrome
 # enable LiveDevelopment Inspector
 Recommends: ruby
-%endif
-Obsoletes: %{name} <= 1.5.0
+Recommends: compat-libgcrypt
 
-# libcef.so require libgcrypt.so.11, libudev.so.0
-# https://github.com/adobe/brackets/issues/10255
-# http://red.fedorapeople.org/SRPMS/compat-libgcrypt-1.5.3-4.fc21.src.rpm
-%if 0%{?fedora} >= 21
-BuildRequires: compat-libgcrypt
-Requires: compat-libgcrypt
-%else
-BuildRequires: libgcrypt
-Requires: libgcrypt
-%endif
 
 %description
- Brackets is an open-source editor for web design and development
- built on top of web technologies such as HTML, CSS and JavaScript.
- The project was created and is maintained by Adobe, and is released
- under an MIT License.
+Brackets is an open-source editor for web design and development
+built on top of web technologies such as HTML, CSS and JavaScript.
+The project was created and is maintained by Adobe, and is released
+under an MIT License.
 
 %prep
-git clone https://github.com/adobe/brackets
-git clone https://github.com/adobe/brackets-shell
-pushd %{name} && git checkout %{_commit0} && git submodule update --init && popd
-pushd %{name}-shell && git checkout %{_commit1} && popd
+# We need some sub-modules
+%{S:3} -c %{_commit}
+%{S:4} -c %{_commit1}
+mv -f  brackets-shell-%{_shortcommit1} %{name}-%{_shortcommit}/brackets-shell
+
+%setup -T -D -n %{name}-%{_shortcommit} 
+
+%if %{with source_cef} 
+mkdir -p brackets-shell/downloads/
+mv -f %{S:2} brackets-shell/downloads/
+%endif
 
 %build
-ln -sfv %{_libdir}/libudev.so.1 %{_builddir}/libudev.so.0
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{_builddir}"
-export CFLAGS="%{optflags} -fPIC -pie"
-export CXXFLAGS="%{optflags} -fPIC -pie"
 
-pushd %{_builddir}/%{name}
-npm install && npm install grunt-cli
-./node_modules/.bin/grunt clean less targethtml useminPrepare htmlmin requirejs concat copy usemin
-cp -a src/config.json dist/config.json
+# get nvm
 
-pushd %{_builddir}/%{name}-shell
-npm install && npm install grunt-cli
-./node_modules/.bin/grunt setup full-build
+git clone https://github.com/creationix/nvm.git ~/nvm
+
+# activate nvm
+
+echo "source ~/nvm/nvm.sh" >> ~/.bashrc
+
+source ~/.bashrc
+nvm install 6.11.0
+nvm use 6.11.0
+
+%if %{with clang}
+export CC=clang
+export CXX=clang++
+%endif
+
+# build 
+pushd brackets-shell
+	sed -i 's/python/python2/' gyp/gyp
+	npm install
+	#environment cleaning due to branch switch
+	rm -rf out
+	node_modules/grunt-cli/bin/grunt cef icu node create-project
+        make V=0
+popd
+	npm install 
+	sed "/'npm-install',$/d" -i Gruntfile.js
+	brackets-shell/deps/node/bin/Brackets-node node_modules/grunt-cli/bin/grunt build
 
 %install
-mkdir --parents %{buildroot}%{_libdir}/%{name} %{buildroot}%{_datadir}
-pushd %{_builddir}/%{name}-shell
-cp -a installer/linux/debian/package-root/opt/%{name}/. %{buildroot}%{_libdir}/%{name}
-cp -a installer/linux/debian/package-root/usr/share/icons %{buildroot}%{_datadir}/
-popd
+pushd brackets-shell
+	install -Dm755 installer/linux/debian/brackets "%{buildroot}/opt/brackets/brackets"
+	install -dm755 "%{buildroot}/usr/bin"
+	ln -s /opt/brackets/brackets "%{buildroot}/usr/bin/brackets"
 
-mkdir --parents %{buildroot}%{_bindir}
-ln -sfv %{_libdir}/%{name}/%{name} %{buildroot}%{_bindir}/
-ln -sfv %{_libdir}/%{name}/Brackets %{buildroot}%{_bindir}/%{name}-bin
+	install -dm755 "%{buildroot}/usr/share"
+	install -Dm644 installer/linux/debian/brackets.desktop "%{buildroot}/usr/share/applications/brackets.desktop"
+	install -Dm644 installer/linux/debian/package-root/usr/share/icons/hicolor/scalable/apps/brackets.svg "%{buildroot}/usr/share/icons/hicolor/scalable/apps/brackets.svg"
+	for size in 32 48 128 256; do
+		install -Dm644 "out/Release/files/appshell${size}.png" "%{buildroot}/usr/share/icons/hicolor/${size}x${size}/apps/brackets.png"
+	done
 
-mkdir --parents %{buildroot}%{_datadir}/applications
-cat <<EOT >> %{buildroot}%{_datadir}/applications/%{name}.desktop
-[Desktop Entry]
-Name=Brackets
-Type=Application
-Categories=Development
-Exec=brackets %U
-Icon=brackets
-MimeType=text/html;
-Keywords=Text;Editor;Write;Web;Development;
-EOT
-
-desktop-file-install --mode 0644 %{buildroot}%{_datadir}/applications/%{name}.desktop
-rm -rf %{buildroot}%{_libdir}/%{name}/*.desktop
-
-ln -sfv %{_libdir}/libudev.so.1 %{buildroot}%{_libdir}/%{name}/lib/libudev.so.0
-
-# strip symbol information
-strip %{buildroot}%{_libdir}/%{name}/{Brackets{,-node},lib/libcef.so}
-
-# extensions
-mkdir --parents %{buildroot}%{_libdir}/%{name}/auto-install-extensions
-install -m 0644 %{S:0} %{buildroot}%{_libdir}/%{name}/auto-install-extensions/
-
-# Getting Started zh_cn
-# cp -a %{buildroot}%{_libdir}/%{name}/samples/zh-{tw,cn}
-# install -m 0644 %{S:1} %{buildroot}%{_libdir}/%{name}/samples/zh-cn/Get*/index.html
+	pushd out/Release
+	install -dm755 "%{buildroot}/opt/brackets"
+	cp -R {files,locales,node-core} "%{buildroot}/opt/brackets/"
+	find . -maxdepth 1 -type f -exec \
+	cp {} %{buildroot}/opt/brackets/{} \;
+	chmod 4755 %{buildroot}/opt/brackets/chrome-sandbox
+        popd
+         popd
+###
+	cp -rf samples %{buildroot}/opt/brackets/
+        mkdir -p %{buildroot}/opt/brackets/www/
+	cp -rf dist/* %{buildroot}/opt/brackets/www/
 
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null ||:
@@ -127,24 +150,14 @@ fi
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null ||:
 
 %files
-%defattr(-,root,root,-)
-%doc %{name}/README.md
-%license %{name}/LICENSE
-%{_bindir}/%{name}*
-%dir %{_libdir}/%{name}/
-%{_libdir}/%{name}/*
-%{_datadir}/icons/*
+%{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
-%attr(755,root,root) %{_libdir}/%{name}/%{name}
-%attr(755,root,root) %{_libdir}/%{name}/Brackets
-%attr(755,root,root) %{_libdir}/%{name}/Brackets-node
+%{_datadir}/icons/hicolor/*/apps/%{name}.png
+%{_datadir}/icons/hicolor/scalable/apps/brackets.svg
+/opt/brackets/
 
 %changelog
-* Thu Dec  1 2016 mosquito <sensor.wen@gmail.com> - 1.8-1
-- Release 1.8
-* Fri Jun 17 2016 mosquito <sensor.wen@gmail.com> - 1.7-1
-- Release 1.7
-* Mon Jan 25 2016 mosquito <sensor.wen@gmail.com> - 1.6-1
-- Release 1.6
-* Sun Nov 22 2015 mosquito <sensor.wen@gmail.com> - 1.5-1
+
+* Thu Jun 07 2018 David Va <davidva AT tuta DOT io> - 1.13-1
+- Updated to 1.13
 - Initial build
