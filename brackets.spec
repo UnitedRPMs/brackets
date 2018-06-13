@@ -52,6 +52,7 @@ BuildRequires: desktop-file-utils
 BuildRequires: clang llvm
 %endif
 BuildRequires: compat-libgcrypt
+BuildRequires: libXtst-devel
 Requires: desktop-file-utils
 # enable LiveDevelopment Inspector
 Recommends: ruby
