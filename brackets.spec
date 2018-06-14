@@ -44,7 +44,7 @@ BuildRequires: nss-devel
 BuildRequires: pango-devel 
 BuildRequires: unzip
 BuildRequires: gtk2-devel
-BuildRequires: icu
+BuildRequires: libicu-devel
 BuildRequires: git 
 BuildRequires: curl
 BuildRequires: desktop-file-utils
@@ -57,6 +57,14 @@ BuildRequires: unzip
 BuildRequires: fontconfig-devel
 BuildRequires: pkgconfig(libpng)
 BuildRequires: pkgconfig(zlib)
+
+# find dependencies
+BuildRequires: libuuid-devel pcre-devel atk-devel nss-softokn-freebl-devel libXext-devel libXrender-devel libXi-devel
+BuildRequires: libXcomposite-devel libXrandr-devel pango-devel libstdc++-devel
+BuildRequires: glibc-devel nspr-devel nss-util-devel libXau-devel pixman-devel expat-devel glib2-devel gdk-pixbuf2-devel
+BuildRequires: nss-softokn-devel libX11-devel libXfixes-devel cairo-devel libXft-devel libXinerama-devel
+BuildRequires: libXcursor-devel harfbuzz-devel libxcrypt-devel xorg-x11-proto-devel fribidi-devel libxcb-devel
+BuildRequires: graphite2-devel
 
 Requires: desktop-file-utils
 # enable LiveDevelopment Inspector
