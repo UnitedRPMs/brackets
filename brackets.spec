@@ -106,10 +106,13 @@ export CXX=clang++
 # build 
 pushd brackets-shell
 	sed -i 's/python/python2/' gyp/gyp
+        npm config set python /usr/bin/python2 
+        npm cache clean
+        npm config set registry http://registry.npmjs.org/
         npm install grunt
 	npm install
 	#environment cleaning due to branch switch
-	#rm -rf out
+	rm -rf out
 	node_modules/grunt-cli/bin/grunt cef icu node create-project
         make V=0
 popd
