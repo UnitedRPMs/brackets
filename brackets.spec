@@ -110,9 +110,8 @@ pushd brackets-shell
 	npm install
 	#environment cleaning due to branch switch
 	#rm -rf out
-	#node_modules/grunt-cli/bin/grunt cef icu node create-project
-	node_modules/grunt-cli/bin/grunt build
-        #make V=0
+	node_modules/grunt-cli/bin/grunt cef icu node create-project
+        make V=0
 popd
         git remote add upstream https://github.com/adobe/brackets.git
 	npm install 
