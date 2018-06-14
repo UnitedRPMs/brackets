@@ -109,7 +109,7 @@ pushd brackets-shell
         npm install grunt
 	npm install
 	#environment cleaning due to branch switch
-	rm -rf out
+	#rm -rf out
 	#node_modules/grunt-cli/bin/grunt cef icu node create-project
 	node_modules/grunt-cli/bin/grunt build
         #make V=0
