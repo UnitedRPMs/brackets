@@ -53,6 +53,11 @@ BuildRequires: clang llvm
 %endif
 BuildRequires: compat-libgcrypt
 BuildRequires: libXtst-devel
+BuildRequires: unzip 
+BuildRequires: fontconfig-devel
+BuildRequires: pkgconfig(libpng)
+BuildRequires: pkgconfig(zlib)
+
 Requires: desktop-file-utils
 # enable LiveDevelopment Inspector
 Recommends: ruby
@@ -100,6 +105,7 @@ export CXX=clang++
 # build 
 pushd brackets-shell
 	sed -i 's/python/python2/' gyp/gyp
+        npm install grunt
 	npm install
 	#environment cleaning due to branch switch
 	rm -rf out
@@ -108,7 +114,7 @@ pushd brackets-shell
 popd
 	npm install 
 	sed "/'npm-install',$/d" -i Gruntfile.js
-	brackets-shell/deps/node/bin/Brackets-node node_modules/grunt-cli/bin/grunt build
+	brackets-shell/deps/node/bin/Brackets-node node_modules/grunt-cli/bin/grunt build --force
 
 %install
 pushd brackets-shell
