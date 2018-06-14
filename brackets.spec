@@ -17,7 +17,7 @@
 %global _shortcommit1 %(c=%{_commit1}; echo ${c:0:7})
 
 %bcond_with clang
-%bcond_with source_cef
+%bcond_without source_cef
 
 Name:    brackets
 Version: 1.13
