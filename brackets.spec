@@ -35,7 +35,6 @@ Source2: http://s3.amazonaws.com/files.brackets.io/cef/cef_binary_3.2785.1487_li
 %endif
 Source3: brackets-snapshot
 Source4: brackets-shell-snapshot
-Source5: https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2
 
 BuildRequires: alsa-lib
 BuildRequires: GConf2 
@@ -85,9 +84,6 @@ mkdir -p brackets-shell/downloads/
 mv -f %{S:2} brackets-shell/downloads/
 %endif
 
-mkdir -p node_modules/phantomjs/phantomjs/
-mv -f %{S:5} node_modules/phantomjs/phantomjs/
-
 %build
 
 # get nvm
@@ -114,8 +110,9 @@ pushd brackets-shell
 	npm install
 	#environment cleaning due to branch switch
 	rm -rf out
-	node_modules/grunt-cli/bin/grunt cef icu node create-project
-        make V=0
+	#node_modules/grunt-cli/bin/grunt cef icu node create-project
+	node_modules/grunt-cli/bin/grunt build
+        #make V=0
 popd
         git remote add upstream https://github.com/adobe/brackets.git
 	npm install 
