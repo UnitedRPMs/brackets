@@ -35,6 +35,7 @@ Source2: http://s3.amazonaws.com/files.brackets.io/cef/cef_binary_3.2785.1487_li
 %endif
 Source3: brackets-snapshot
 Source4: brackets-shell-snapshot
+Source5: https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2
 
 BuildRequires: alsa-lib
 BuildRequires: GConf2 
@@ -83,6 +84,9 @@ mv -f  brackets-shell-%{_shortcommit1} %{name}-%{_shortcommit}/brackets-shell
 mkdir -p brackets-shell/downloads/
 mv -f %{S:2} brackets-shell/downloads/
 %endif
+
+mkdir -p node_modules/phantomjs/phantomjs/
+mv -f %{S:5} node_modules/phantomjs/phantomjs/
 
 %build
 
