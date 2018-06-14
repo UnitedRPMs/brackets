@@ -107,13 +107,13 @@ export CXX=clang++
 pushd brackets-shell
 	sed -i 's/python/python2/' gyp/gyp
         npm install grunt
-        npm install grunt-contrib-jasmine
 	npm install
 	#environment cleaning due to branch switch
 	rm -rf out
 	node_modules/grunt-cli/bin/grunt cef icu node create-project
         make V=0
 popd
+        git remote add upstream https://github.com/adobe/brackets.git
 	npm install 
 	sed "/'npm-install',$/d" -i Gruntfile.js
 	brackets-shell/deps/node/bin/Brackets-node node_modules/grunt-cli/bin/grunt build --force
