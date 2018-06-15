@@ -9,18 +9,18 @@
 %global __requires_exclude (npm|libnode)
 
 # commit brackets
-%global _commit defded0cafa7a7e815ba30d5c8babaa483042dde
+%global _commit 93cfeacca60b30ef7cfcfacbc434f2f4d3fda624
 %global _shortcommit %(c=%{_commit}; echo ${c:0:7})
 
 # commit brackets-shell
-%global _commit1 66072d0d75040f9c9b49631475bd747e87e556f7
+%global _commit1 7a30c21f22f586faedab11e7756ab23baec38a04
 %global _shortcommit1 %(c=%{_commit1}; echo ${c:0:7})
 
 %bcond_with clang
 %bcond_without source_cef
 
 Name:    brackets
-Version: 1.13
+Version: 1.14
 Release: 1%{?dist}
 Summary: An open source code editor for the web
 
@@ -169,6 +169,9 @@ fi
 /opt/brackets/
 
 %changelog
+
+* Fri Jun 15 2018 David Va <davidva AT tuta DOT io> - 1.14-1
+- Updated to 1.14
 
 * Thu Jun 07 2018 David Va <davidva AT tuta DOT io> - 1.13-1
 - Updated to 1.13
