@@ -9,19 +9,19 @@
 %global __requires_exclude (npm|libnode)
 
 # commit brackets
-%global _commit 93cfeacca60b30ef7cfcfacbc434f2f4d3fda624
+%global _commit fa00beb5f945caa133e706f9c0eff68c9edcecf1
 %global _shortcommit %(c=%{_commit}; echo ${c:0:7})
 
 # commit brackets-shell
-%global _commit1 7a30c21f22f586faedab11e7756ab23baec38a04
+%global _commit1 46b57086a1e887c488279cdb3e0f24d56b939cb3
 %global _shortcommit1 %(c=%{_commit1}; echo ${c:0:7})
 
 %bcond_with clang
-%bcond_without source_cef
+%bcond_with source_cef
 
 Name:    brackets
 Version: 1.14
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: An open source code editor for the web
 
 Group:   Applications/Editors
@@ -51,18 +51,18 @@ BuildRequires: desktop-file-utils
 %if %{with clang} 
 BuildRequires: clang llvm
 %endif
-BuildRequires: compat-libgcrypt
+#BuildRequires: compat-libgcrypt
 BuildRequires: libXtst-devel
 BuildRequires: unzip 
 BuildRequires: fontconfig-devel
 BuildRequires: pkgconfig(libpng)
 BuildRequires: pkgconfig(zlib)
-
+BuildRequires: gcc-c++
 
 Requires: desktop-file-utils
 # enable LiveDevelopment Inspector
 Recommends: ruby
-Recommends: compat-libgcrypt
+#Recommends: compat-libgcrypt
 
 
 %description
@@ -151,12 +151,22 @@ pushd brackets-shell
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null ||:
 /usr/bin/update-desktop-database &>/dev/null ||:
 
+if [ -f /usr/bin/chromium-freeworld ] && [ ! -f /usr/bin/chrome ]; then
+ln -sf /usr/bin/chromium-freeworld /usr/bin/chrome
+elif [ -f /usr/bin/chromium ] && [ ! -f /usr/bin/chrome ]; then
+ln -sf /usr/bin/chromium /usr/bin/chrome
+fi
+
 %postun
 if [ $1 -eq 0 ]; then
     /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null ||:
     /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null ||:
 fi
 /usr/bin/update-desktop-database &>/dev/null ||:
+
+if [ -f /usr/bin/chrome ]; then
+zsh -c 'rm /usr/bin/chrome(@)'
+fi
 
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null ||:
@@ -169,6 +179,9 @@ fi
 /opt/brackets/
 
 %changelog
+
+* Fri Aug 24 2018 David Va <davidva AT tuta DOT io> - 1.14-2
+- Updated to current commit
 
 * Fri Jun 15 2018 David Va <davidva AT tuta DOT io> - 1.14-1
 - Updated to 1.14

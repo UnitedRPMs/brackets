@@ -9,7 +9,7 @@ install: true
 
 build:
   pre_ci_boot:
-    image_name: davidva/unibuild-28
+    image_name: davidva/unibuild-29
     image_tag: latest
     pull: true
     env: LM=ML 
@@ -24,7 +24,7 @@ build:
 
 # the build scripts
 script:
-- docker run --privileged=true --cap-add=SYS_ADMIN -v $(pwd):/root/enjoy/ davidva/unibuild-28 /bin/sh -c "rm -f urpms && wget -c https://raw.githubusercontent.com/kuboosoft/united-build/master/urpms && chmod a+x urpms && /urpms -g UnitedRPMs/brackets -s brackets.spec -t unitedrpms-28-x86_64 -u true"   
+- docker run --privileged=true --cap-add=SYS_ADMIN -v $(pwd):/root/enjoy/ davidva/unibuild-29 /bin/sh -c "rm -f urpms && wget -c https://raw.githubusercontent.com/kuboosoft/united-build/master/urpms && chmod a+x urpms && /urpms -g UnitedRPMs/brackets -s brackets.spec -t unitedrpms-29-x86_64 -u true"   
 
 notifications:
 slack: unitedrpms:lzDykHTpajKrgmGz9NkrO1Hj
